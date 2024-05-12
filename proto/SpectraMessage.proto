@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+message ClientDataMsg {
+  bytes audio_data = 1;
+  float audio_id = 2;
+  float time = 3;
+}
+
+message ServerResponseMsg {
+  bool success = 1;
+  string message = 2;
+}

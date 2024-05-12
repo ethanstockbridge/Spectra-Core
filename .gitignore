@@ -1,0 +1,36 @@
+#user files
+audio
+*images*
+yolo
+temp.*
+venv
+*test*
+*.pyc
+*.csv
+*.names
+*.toml
+
+#yolo datafolders
+datasets
+labeled
+unlabeled
+ultralytics
+
+#misc files
+*.wav
+*.jpg
+*.m4a
+*.mp4
+*.png
+*.json
+*.txt
+*.pt
+*.python
+legacy
+
+#pyinstaller misc
+dist
+build
+*.exe
+*.spec
+*.sh
