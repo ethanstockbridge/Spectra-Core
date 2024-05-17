@@ -95,7 +95,7 @@ class DataPoint:
             path (str): Path to the audio file
         """
         self.__config = ConfigManager()
-        species = self.__config["data"]["species"]
+        species = self.__config["labels"]["classes"]
         self.names=names
         self.classification = [0]*len(species) #get the classification of this data
         for name in self.names:

@@ -145,7 +145,7 @@ def __export_data(dataset_path):
                     # at each of the call centers, get the sensor data
                     species = classes[int(class_i)]
                     data["Time"].append(str(center_call))
-                    data["Species"].append(species)
+                    data["classes"].append(species)
                     # print(center_call)
                     # print(species)
                     for sensor_name in SDP.getSensorNames():
@@ -155,7 +155,7 @@ def __export_data(dataset_path):
 
     csv = ""
     csv+=','.join(data.keys())+"\n"
-    for i in range(0,len(data["Species"])):
+    for i in range(0,len(data["classes"])):
         columns = []
         for column in data.keys():
             columns.append(str(data[column][i]))

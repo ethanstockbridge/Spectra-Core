@@ -128,6 +128,12 @@ class YoloDetector():
         text_results = ""
         image_size = self.__config["yolo"]["size"]
         board = Board()
+        labels=set()
+        # for testing
+        # labels.add(self.__config["labels"]["classes"][0])
+        # labels.add(self.__config["labels"]["classes"][1])
+        width, height = image.size
+        # add detection rectangles
         for i in range(0,len(boxes)):
             box = boxes[i]
             conf = box.conf.tolist()[0]
@@ -143,11 +149,20 @@ class YoloDetector():
                     cx,cy,w,h = (xyxy[0]+xyxy[2])/2, (xyxy[1]+xyxy[3])/2, xyxy[2]-xyxy[0], xyxy[3]-xyxy[1]
                     text_results += f"{label} {cx/image_size} {cy/image_size} {w/image_size} {h/image_size}\n"
                     # cv format: x1y1 x2y2
-                    bgr = (0, 255, 0)
+                    # add rectangle for det
+                    bgr = self.__config["labels"]["colors"][self.__config["labels"]["classes"].index(label_name)]
                     cv2.rectangle(frame, (x1, y1), (x2, y2), bgr, 1)
-                    cv2.putText(frame, label_name, (x1, y1), cv2.FONT_HERSHEY_SIMPLEX, 0.9, bgr, 2)
+                    # cv2.putText(frame, label_name, (x1, y1), cv2.FONT_HERSHEY_SIMPLEX, 0.9, bgr, 2)
+                    labels.add(label_name)
                 else:
                     print("Object collided")
+        labels=list(labels)
+        labels.sort()
+        # add class names to bottom left of image
+        for i, label_name in enumerate(labels):
+            bgr = self.__config["labels"]["colors"][self.__config["labels"]["classes"].index(label_name)]
+            cv2.putText(frame, label_name, (0, height-22*(i)-10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, bgr, 2)
+        # save image
         Image.fromarray(frame).save(output_image_path)
         with open(input_image_path.replace(self.__config["spectrogram"]["format"],"txt"), "w") as file:
             file.write(text_results)

@@ -26,6 +26,7 @@ from variables import *
 
 COLOR_PRIMARY = '#00B530'
 COLOR_BACKGROUND = '#313537'
+# colors for sensor data
 colors=[
     "#5A64EE",#purple
     "#3DD72B",#bright green
@@ -105,7 +106,7 @@ def plot_distribution(path_graph, dict_data):
     dict_data["Time"]=time_datetime
     print(time_datetime[0], time_datetime[-1])
 
-    # extract_dict={"Time":dict_data["Time"], "Species":dict_data["Species"]}
+    # extract_dict={"Time":dict_data["Time"], "Species":dict_data["classes"]}
     df = pd.DataFrame(dict_data)
 
     plt.figure()
@@ -123,7 +124,7 @@ def plot_distribution(path_graph, dict_data):
     if time_datetime[0].strftime("%m-%d-%Y") != time_datetime[-1].strftime("%m-%d-%Y"):
         plt.title(f'Species call distribution ({time_datetime[0].strftime("%m-%d-%Y")}-{time_datetime[-1].strftime("%m-%d-%Y")})', color=COLOR_PRIMARY)
 
-    palette = [COLOR_PRIMARY for unique_label in set(dict_data["Species"])]
+    palette = [COLOR_PRIMARY for unique_label in set(dict_data["classes"])]
 
     sns.stripplot(data=df, x='Time', y='Species', jitter=True, alpha=0.7, palette=palette)
 
@@ -284,7 +285,7 @@ def extract_species_times(dict_data):
 
 def generate_counts(dict_data, dict_species_time):
     str_metrics = "Total Counts:\n"
-    for species in set(dict_data["Species"]):
+    for species in set(dict_data["classes"]):
         str_metrics+=f'{species}: {len(dict_species_time[species])}\n'
 
     dict_metrics = {}

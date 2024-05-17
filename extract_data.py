@@ -34,7 +34,7 @@ if __name__ == "__main__":
 
     print("Collecting data")
     start_time = time.time()
-    data_points = gather_audio(config["paths"]["audio"], config["data"]["species"])
+    data_points = gather_audio(config["paths"]["audio"], config["labels"]["classes"])
     end_time = time.time()
     print(f"Data collection took {end_time-start_time:0.1f} seconds")
 
