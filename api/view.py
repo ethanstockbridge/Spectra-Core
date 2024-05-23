@@ -46,7 +46,7 @@ ImageNotFound="/api/image/no_detections_found"
 def generate_data(path_dataset):
     """Generate the data.csv file given the class names and possible sensor data
     Then extract that data and pass it back
-    {"Time":[0.2,0.4], "Species":["a","b"], "Sensor1":[9,10]}
+    {"Time":[0.2,0.4], "Classification":["a","b"], "Sensor1":[9,10]}
 
     Args:
         path_dataset (str): path to data csv
@@ -90,13 +90,13 @@ def generate_data(path_dataset):
     return dict_data
 
 def plot_distribution(path_graph, dict_data):
-    """Plot the graph of species vs time.
+    """Plot the graph of classification vs time.
     Note that this MUST be in a new process because otherwise it will not be allowed
     since flask uses multithreading to handle requests, and the matplotlib uses qt
     which needs to be in the main thread, so starting a new process will fix that
 
     Args:
-        data (dict): species: detection times
+        data (dict): classification: detection times
         path_graph (str): output path to graph
     """
 
@@ -106,7 +106,7 @@ def plot_distribution(path_graph, dict_data):
     dict_data["Time"]=time_datetime
     print(time_datetime[0], time_datetime[-1])
 
-    # extract_dict={"Time":dict_data["Time"], "Species":dict_data["classes"]}
+    # extract_dict={"Time":dict_data["Time"], "Classification":dict_data["Classification"]}
     df = pd.DataFrame(dict_data)
 
     plt.figure()
@@ -118,15 +118,15 @@ def plot_distribution(path_graph, dict_data):
     ax.xaxis.set_major_locator(MaxNLocator(6))
 
     plt.xlabel('Time', color=COLOR_PRIMARY)
-    plt.ylabel('Species', color=COLOR_PRIMARY)
+    plt.ylabel("Classification", color=COLOR_PRIMARY)
 
-    plt.title(f'Species call distribution ({time_datetime[0].strftime("%m-%d-%Y")})', color=COLOR_PRIMARY)
+    plt.title(f'Classification distribution ({time_datetime[0].strftime("%m-%d-%Y")})', color=COLOR_PRIMARY)
     if time_datetime[0].strftime("%m-%d-%Y") != time_datetime[-1].strftime("%m-%d-%Y"):
-        plt.title(f'Species call distribution ({time_datetime[0].strftime("%m-%d-%Y")}-{time_datetime[-1].strftime("%m-%d-%Y")})', color=COLOR_PRIMARY)
+        plt.title(f'Classification distribution ({time_datetime[0].strftime("%m-%d-%Y")}-{time_datetime[-1].strftime("%m-%d-%Y")})', color=COLOR_PRIMARY)
 
-    palette = [COLOR_PRIMARY for unique_label in set(dict_data["classes"])]
+    palette = [COLOR_PRIMARY for unique_label in set(dict_data["Classification"])]
 
-    sns.stripplot(data=df, x='Time', y='Species', jitter=True, alpha=0.7, palette=palette)
+    sns.stripplot(data=df, x='Time', y="Classification", jitter=True, alpha=0.7, palette=palette)
 
     plt.gca().spines["left"].set_color(COLOR_PRIMARY)
     plt.gca().spines["right"].set_color(COLOR_PRIMARY)
@@ -140,31 +140,31 @@ def plot_distribution(path_graph, dict_data):
     print("Generated distribution graph")
 
 
-def plot_count_bar_graph(path_graph, dict_species_time):
-    """Plot the graph of species vs time.
+def plot_count_bar_graph(path_graph, dict_class_time):
+    """Plot the graph of classification vs time.
     Note that this MUST be in a new process because otherwise it will not be allowed
     since flask uses multithreading to handle requests, and the matplotlib uses qt
     which needs to be in the main thread, so starting a new process will fix that
 
     Args:
-        data (dict): species: detection times
+        data (dict): classification: detection times
         path_graph (str): output path to graph
     """
-    species_counts = {species: len(data_points) for species, data_points in dict_species_time.items()}
-    species = list(species_counts.keys())
-    counts = list(species_counts.values())
+    class_counts = {classification: len(data_points) for classification, data_points in dict_class_time.items()}
+    classes = list(class_counts.keys())
+    counts = list(class_counts.values())
 
     plt.figure()
     fig, ax = plt.subplots(figsize=(16, 8))
     ax.set_facecolor(COLOR_BACKGROUND)  # Set background color for axis
     fig.set_facecolor(COLOR_BACKGROUND) # Set background color for figure
 
-    plt.bar(species, counts, color=COLOR_PRIMARY)
+    plt.bar(classes, counts, color=COLOR_PRIMARY)
     plt.gcf().set_facecolor(COLOR_BACKGROUND)  # Set background color
 
-    plt.xlabel('Species', color=COLOR_PRIMARY)
+    plt.xlabel("Classes", color=COLOR_PRIMARY)
     plt.ylabel('Count', color=COLOR_PRIMARY)
-    plt.title('Species counts', color=COLOR_PRIMARY)
+    plt.title('Classification counts', color=COLOR_PRIMARY)
 
     plt.gca().spines["left"].set_color(COLOR_PRIMARY)
     plt.gca().spines["right"].set_color(COLOR_PRIMARY)
@@ -271,30 +271,30 @@ def more_than_x_in_range(float_list):
         max_count = max(max_count, count)
     return min(ceil(max_count/2),3)
 
-def extract_species_times(dict_data):
-    #Turn the "data" (species:[species,species],time:[time,time]) into
-    #{species:[time,time],species:[time,time]}
+def extract_classification_times(dict_data):
+    #Turn the "data" (classification:[classification,classification],time:[time,time]) into
+    #{classification:[time,time],classification:[time,time]}
     time_dict = {}
-    for species, time_sec in zip(dict_data['Species'], dict_data['Time']):
-        if species not in time_dict:
-            time_dict[species] = []
-        time_dict[species].append(time_sec)
-    dict_species_time = {k: v for k, v in time_dict.items()}
-    #dict_species_time is {species:[time,time],species:[time,time]}
-    return dict_species_time
+    for classification, time_sec in zip(dict_data["Classification"], dict_data['Time']):
+        if classification not in time_dict:
+            time_dict[classification] = []
+        time_dict[classification].append(time_sec)
+    dict_class_time = {k: v for k, v in time_dict.items()}
+    #dict_class_time is {classification:[time,time],classification:[time,time]}
+    return dict_class_time
 
-def generate_counts(dict_data, dict_species_time):
+def generate_counts(dict_data, dict_class_time):
     str_metrics = "Total Counts:\n"
-    for species in set(dict_data["classes"]):
-        str_metrics+=f'{species}: {len(dict_species_time[species])}\n'
+    for classification in set(dict_data["Classification"]):
+        str_metrics+=f'{classification}: {len(dict_class_time[classification])}\n'
 
     dict_metrics = {}
 
     str_metrics += "\nSpectra str_metrics Calculated:\n"
-    for species in list(dict_species_time.keys()):
-        calculated_intensity = more_than_x_in_range(dict_species_time[species])
-        str_metrics+=f'{species}: {calculated_intensity}\n'
-        dict_metrics[species]= calculated_intensity
+    for classification in list(dict_class_time.keys()):
+        calculated_intensity = more_than_x_in_range(dict_class_time[classification])
+        str_metrics+=f'{classification}: {calculated_intensity}\n'
+        dict_metrics[classification]= calculated_intensity
 
     return str_metrics, dict_metrics
 
@@ -303,7 +303,7 @@ def generate_distribution_graph(path_graph, dict_data):
     """Generate the plot graph, use multiprocessing because matplotlib needs to be in a main thread
 
     Args:
-        data (dict): species:[species,species],time:[time,time]
+        data (dict): classification:[classification,classification],time:[time,time]
         path_graph (str): path to output graph
     """
     print(f"Generating graph: {path_graph}")
@@ -316,17 +316,17 @@ def generate_distribution_graph(path_graph, dict_data):
             return False
 
 
-def generate_count_bar_graph(path_graph, dict_species_time):
+def generate_count_bar_graph(path_graph, dict_class_time):
     """Generate the plot graph, use multiprocessing because matplotlib needs to be in a main thread
 
     Args:
-        data (dict): species:[species,species],time:[time,time]
+        data (dict): classification:[classification,classification],time:[time,time]
         path_graph (str): path to output graph
     """
     print(f"Generating graph: {path_graph}")
     if not os.path.exists(path_graph):
         try:
-            mp = multiprocessing.Process(target=plot_count_bar_graph, args=[path_graph, dict_species_time])
+            mp = multiprocessing.Process(target=plot_count_bar_graph, args=[path_graph, dict_class_time])
             mp.start()
             mp.join()
         except:
@@ -337,7 +337,7 @@ def generate_sensor_graph(path_graph, path_sensors):
     """Generate the plot graph, use multiprocessing because matplotlib needs to be in a main thread
 
     Args:
-        data (dict): species:[species,species],time:[time,time]
+        data (dict): classification:[classification,classification],time:[time,time]
         path_graph (str): path to output graph
     """
     print(f"Generating graph: {path_graph}")
@@ -385,42 +385,13 @@ def generate_additional_metrics(path_dataset, dict_metrics):
     if len(sensorname_temp)>0:
         script+=f"""Average temp: {round(f_to_c(sdp.getAverage(sensorname_temp[0])),1)} c
 """
-    for i, species in enumerate(dict_metrics.keys()):
-        script+=f"""Species {i+1} = "{species}"
-Intensity {i+1} = "{dict_metrics[species]}"
+    for i, classification in enumerate(dict_metrics.keys()):
+        script+=f"""Classification {i+1} = "{classification}"
+Intensity {i+1} = "{dict_metrics[classification]}"
 """
     script+=f"""Notes: {SpectraNotes}
 """
     return script
-
-# def generate_json_editor(path_dataset, dict_metrics):
-#     timezone_offset = -4
-#     timezone_diff = timedelta(hours=timezone_offset)
-#     SpectraNotes = open("./SpectraNotes.txt").read()
-
-#     get_earliest_and_latest_creation_time(path_dataset)
-
-#     start_time = float(open(os.path.join(path_dataset,"start_time.txt"),"r").read())
-#     start_time = datetime.utcfromtimestamp(start_time)+timezone_diff
-#     end_time = float(open(os.path.join(path_dataset,"end_time.txt"),"r").read())
-#     end_time = datetime.utcfromtimestamp(end_time)+timezone_diff
-#     script=f"""document.getElementById("stationId").value = "Spectra HQ";
-# document.getElementById("collectionDate").value = "{start_time.strftime('%Y-%m-%d')}";
-# document.getElementById("StartTime").value = "{start_time.strftime('%I:%M %p').lower()}";
-# document.getElementById("EndTime").value = "{end_time.strftime('%I:%M %p').lower()}";    
-# document.getElementById("Notes").value = "{SpectraNotes}";    
-# """
-#     path_sensors = os.path.join(path_dataset,"sensor_readings.csv")
-#     sdp=SensorDataParser(path_sensors)
-#     sensorname_temp = [x for x in sdp.getSensorNames() if x.lower().find("temp")!=-1]
-#     if len(sensorname_temp)>0:
-#         script+=f"""document.getElementById("AirTemperature_value").value = "{round(f_to_c(sdp.getAverage(sensorname_temp[0])),1)}"
-#         """
-#     for i, species in enumerate(dict_metrics.keys()):
-#         script+=f"""document.getElementById("Frog & Toad Observation-fields_{i}_FrogWatch_SpeciesId").value = "{species}"
-# document.getElementById("Frog & Toad Observation-fields_{i}_FrogWatch_CallIntensity").value = "{dict_metrics[species]}"
-# """
-#     return script
 
 
 @api_view.route('/get_dataset', methods=['GET', 'POST'])
@@ -449,18 +420,18 @@ def get_dataset():
     path_sensors=os.path.join(path_dataset,"sensor_readings.csv")
 
     path_distribution_graph = os.path.join(path_dataset,"graph_distribution.jpg")
-    path_species_count_graph = os.path.join(path_dataset,"graph_species_count.jpg")
+    path_classification_count_graph = os.path.join(path_dataset,"graph_classification_count.jpg")
     path_sensors_graph = os.path.join(path_dataset,"graph_sensors.jpg")
 
     dict_data = generate_data(path_dataset)
-    str_metrics = "No species were found"
+    str_metrics = "No detections were found"
     dict_metrics = {}
     if dict_data:
-        str_metrics, dict_metrics=generate_counts(dict_data, extract_species_times(dict_data))
+        str_metrics, dict_metrics=generate_counts(dict_data, extract_classification_times(dict_data))
         if not os.path.exists(path_distribution_graph):
             generate_distribution_graph(path_distribution_graph, dict_data)
-        if not os.path.exists(path_species_count_graph):
-            generate_count_bar_graph(path_species_count_graph, extract_species_times(dict_data))
+        if not os.path.exists(path_classification_count_graph):
+            generate_count_bar_graph(path_classification_count_graph, extract_classification_times(dict_data))
 
     if not os.path.exists(path_sensors_graph):
         generate_sensor_graph(path_sensors_graph, path_sensors)
@@ -468,8 +439,8 @@ def get_dataset():
     graph_distribution_image_id = media_id_translator().create_new_access(path_distribution_graph)
     graph_distribution_image_url=request.url_root+f"{image_api}{graph_distribution_image_id}"
 
-    graph_species_count_image_id = media_id_translator().create_new_access(path_species_count_graph)
-    graph_species_count_image_url=request.url_root+f"{image_api}{graph_species_count_image_id}"
+    graph_classification_count_image_id = media_id_translator().create_new_access(path_classification_count_graph)
+    graph_classification_count_image_url=request.url_root+f"{image_api}{graph_classification_count_image_id}"
 
     graph_sensors_image_id = media_id_translator().create_new_access(path_sensors_graph)
     graph_sensors_image_url=request.url_root+f"{image_api}{graph_sensors_image_id}"
@@ -498,7 +469,7 @@ def get_dataset():
 
     response_data = {
         'graph_distribution': (graph_distribution_image_url if os.path.exists(path_distribution_graph) else request.url_root+ImageNotFound),
-        'graph_count': (graph_species_count_image_url if os.path.exists(path_species_count_graph) else request.url_root+ImageNotFound),
+        'graph_count': (graph_classification_count_image_url if os.path.exists(path_classification_count_graph) else request.url_root+ImageNotFound),
         'graph_sensors': (graph_sensors_image_url if os.path.exists(path_sensors_graph) else request.url_root+ImageNotFound),
         'text': (str_metrics if str_metrics!=None else "No detections found"),
         'images': images_ids,

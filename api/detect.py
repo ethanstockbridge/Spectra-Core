@@ -90,7 +90,7 @@ def __export_data(dataset_path):
     for the user to post-process
 
     data.csv
-    Time, Species, sensor1, sensor2
+    Time, Classification, sensor1, sensor2
     0,"spring peeper",1,2
     1,"spring peeper",2,3
     2,"spring peeper",3,4
@@ -113,7 +113,7 @@ def __export_data(dataset_path):
 
     data = {
         'Time': [],
-        'Species': [],
+        "Classification": [],
     }
 
     # Gather columns into file
@@ -143,11 +143,11 @@ def __export_data(dataset_path):
                     # print(datetime.datetime.fromtimestamp(center_call))
 
                     # at each of the call centers, get the sensor data
-                    species = classes[int(class_i)]
+                    classification = classes[int(class_i)]
                     data["Time"].append(str(center_call))
-                    data["classes"].append(species)
+                    data["Classification"].append(classification)
                     # print(center_call)
-                    # print(species)
+                    # print(classification)
                     for sensor_name in SDP.getSensorNames():
                         if sensor_name=="Time":
                             continue #dont add time again because we already calculated time of detection
@@ -155,7 +155,7 @@ def __export_data(dataset_path):
 
     csv = ""
     csv+=','.join(data.keys())+"\n"
-    for i in range(0,len(data["classes"])):
+    for i in range(0,len(data["Classification"])):
         columns = []
         for column in data.keys():
             columns.append(str(data[column][i]))

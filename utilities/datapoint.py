@@ -83,7 +83,7 @@ class DataPoint:
     """Each file turns into this container which holds:
     Raw audio data
     spectrogram data
-    Species name(s) in audio
+    Classification name(s) in audio
     Split time data
     """
 
@@ -95,11 +95,11 @@ class DataPoint:
             path (str): Path to the audio file
         """
         self.__config = ConfigManager()
-        species = self.__config["labels"]["classes"]
+        classification = self.__config["labels"]["class_names"]
         self.names=names
-        self.classification = [0]*len(species) #get the classification of this data
+        self.classification = [0]*len(classification) #get the classification of this data
         for name in self.names:
-            self.classification[species.index(name)]=1
+            self.classification[classification.index(name)]=1
         self.classification=np.array(self.classification)
         self.path=path
         self.filedata=None

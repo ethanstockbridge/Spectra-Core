@@ -7,7 +7,7 @@ from utilities.datapoint import DataPoint
 # to overwrite old spectrograms, change this to true:
 force = False
 
-def gather_audio(audio, species):
+def gather_audio(audio, class_name):
     """Gather the files from the 'audio' folder
 
     Returns:
@@ -15,11 +15,11 @@ def gather_audio(audio, species):
     """
     data = []
     folders = os.listdir(audio)
-    for species in folders:
-        files = os.listdir(os.path.join(audio, species))
+    for class_name in folders:
+        files = os.listdir(os.path.join(audio, class_name))
         for file in files:
             if "wav" in file:
-                data.append(DataPoint([species],os.path.join(audio, species, file)))
+                data.append(DataPoint([class_name],os.path.join(audio, class_name, file)))
     return data
 
 
@@ -34,7 +34,7 @@ if __name__ == "__main__":
 
     print("Collecting data")
     start_time = time.time()
-    data_points = gather_audio(config["paths"]["audio"], config["labels"]["classes"])
+    data_points = gather_audio(config["paths"]["audio"], config["labels"]["class_name"])
     end_time = time.time()
     print(f"Data collection took {end_time-start_time:0.1f} seconds")
 

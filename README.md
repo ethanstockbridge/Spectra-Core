@@ -83,7 +83,7 @@ Additional typical yolo arguments can be added such as `epochs=500`, `lr0=0.001`
 # User interface
 This is a work in progress, but I have made a user interface using React that allows real-time identification of calls. Note that you must first complete a training to use the UI (otherwise it's kind of pointless trying to identify without using a model) 
 After completion of training, follow the instructions to fetch and install the UI repository:
-[Spectra-Core-UI](https://github.com/ethanstockbridge/Spectra-Core-UI)
+[Spectra-UI](https://github.com/ethanstockbridge/Spectra-UI)
 
 # License  
 This project is licensed under the GNU AFFERO GENERAL PUBLIC LICENSE.

@@ -31,8 +31,15 @@ time_period = __config["audio"]["time_period"]
 rate = __config["audio"]["sample_rate"]
 
 
+# TODO #01:
+# Mark images as "Sent" after sending to client
+# -> Only remove image if it has been sent to the client
 def remove_previous(dataset_dir, chunk_id):
-    previous_id=chunk_id-1
+    # TEMP FIX: Increase chunk delay to allow images to be sent to client
+    # With a delay of 1, sometimes the image cannot be sent in time and gets deleted before being sent
+    # resulting in 'os: not found error' if the weather station is not found and server times out trying
+    # to hear back from it (approx 2 sec)
+    previous_id=chunk_id-2 
     if previous_id%__config["recording"]["sparse_index"]!=0:
         path_previous_audio_chunk = os.path.join(dataset_dir, f'audio_{previous_id}.{__config["audio"]["file_extension"]}')
         path_previous_spectro_image = os.path.join(dataset_dir, f'spectro_{previous_id}.{__config["spectrogram"]["format"]}')
