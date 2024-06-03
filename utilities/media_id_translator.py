@@ -21,6 +21,7 @@ class media_id_translator():
         self.lock = threading.Lock()
         self.default_translation_file=json.loads(ConfigManager()["spectrogram"]["default_translation"])
         self.translation_file = translation_file
+        self.translator_id_img=None
 
     def create_new_access(self, rel_filepath="", id_guess=None):
         """Generate an access key for an image
@@ -33,33 +34,32 @@ class media_id_translator():
             int: ID
         """
         with self.lock:
-            translator_id_img=ConfigManager()["spectrogram"]["default_translation"]
             if(os.path.exists(os.path.join(self.root_path,self.translation_file))):
                 file_contents=open(os.path.join(self.root_path,self.translation_file),"r").read()
                 if file_contents!="":
                     try:
-                        translator_id_img=json.loads(file_contents)
+                        self.translator_id_img=json.loads(file_contents)
                     except Exception as e:
-                        open(os.path.join(self.root_path,self.translation_file),"w").write(self.default_translation_file)
+                        open(os.path.join(self.root_path,self.translation_file),"w").write(json.dumps(self.default_translation_file))
                         print(e)
                         print("Catastrophic failure media id translator. Saving failed contents")
                         # open(os.path.exists(os.path.join(root_path,translation_file.replace(".json","_failed.json"))),"w").write(file_contents)
                 else:
-                    translator_id_img=self.default_translation_file
+                    self.translator_id_img=self.default_translation_file
             else:
-                translator_id_img=self.default_translation_file
-            if rel_filepath not in list(translator_id_img.values()):
+                self.translator_id_img=self.default_translation_file
+            if rel_filepath not in list(self.translator_id_img.values()):
                 if rel_filepath!=None and id_guess==None:
-                    id_guess = len(list(translator_id_img.keys()))
-                    while id_guess in list(translator_id_img.keys()):
+                    id_guess = len(list(self.translator_id_img.keys()))
+                    while id_guess in list(self.translator_id_img.keys()):
                         id_guess+=1
                     #found new id
-                    translator_id_img[id_guess]=rel_filepath
-                    out = json.dumps(translator_id_img)
+                    self.translator_id_img[id_guess]=rel_filepath
+                    out = json.dumps(self.translator_id_img)
                     open(os.path.join(self.root_path,self.translation_file),"w").write(out)
                     return id_guess
             else:
-                id_guess = [i for i in translator_id_img.keys() if translator_id_img[i]==rel_filepath]
+                id_guess = [i for i in self.translator_id_img.keys() if self.translator_id_img[i]==rel_filepath]
                 return id_guess[0]
 
     def __getitem__(self, key):
@@ -72,21 +72,21 @@ class media_id_translator():
             str: Path
         """
         with self.lock:
-            translator_id_img=self.default_translation_file
+            self.translator_id_img=self.default_translation_file
             if(os.path.exists(os.path.join(self.root_path,self.translation_file))):
                 file_contents=open(os.path.join(self.root_path,self.translation_file),"r").read()
                 if file_contents!="":
                     try:
-                        translator_id_img=json.loads(file_contents)
+                        self.translator_id_img=json.loads(file_contents)
                     except Exception as e:
                         print(e)
                         print("Catastrophic failure media id translator. Saving failed contents")
                         # open(os.path.exists(os.path.join(root_path,translation_file.replace(".json","_failed.json"))),"w").write(file_contents)
                 else:
-                    translator_id_img=self.default_translation_file
+                    self.translator_id_img=self.default_translation_file
             else:
-                translator_id_img=self.default_translation_file
-            return translator_id_img[key]
+                self.translator_id_img=self.default_translation_file
+            return self.translator_id_img[key]
     
 
 if __name__ == "__main__":
