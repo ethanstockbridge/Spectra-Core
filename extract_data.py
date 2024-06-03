@@ -7,7 +7,7 @@ from utilities.datapoint import DataPoint
 # to overwrite old spectrograms, change this to true:
 force = False
 
-def gather_audio(audio, class_name):
+def gather_audio(audio):
     """Gather the files from the 'audio' folder
 
     Returns:
@@ -15,11 +15,11 @@ def gather_audio(audio, class_name):
     """
     data = []
     folders = os.listdir(audio)
-    for class_name in folders:
-        files = os.listdir(os.path.join(audio, class_name))
+    for folder in folders:
+        files = os.listdir(os.path.join(audio, folder))
         for file in files:
             if "wav" in file:
-                data.append(DataPoint([class_name],os.path.join(audio, class_name, file)))
+                data.append(DataPoint(os.path.join(audio, folder, file)))
     return data
 
 

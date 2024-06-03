@@ -6,6 +6,7 @@ from PIL import Image
 
 from config.config_manager import ConfigManager
 from ultralytics import YOLO
+from utilities.datapoint import rgb
 
 #TODO: TBD: Make yolo detector a separate service?
 
@@ -91,6 +92,7 @@ class YoloDetector():
         except:
             print("ERROR: model not found, change model path in config file")
             exit(1)
+        self.get_label_names()
 
     def predict(self, input_image_path):
         """Predict the detections on an image
@@ -106,10 +108,21 @@ class YoloDetector():
     
     def save_labels(self, output_path):
         text_results = ""
-        for name in self.model.names.values():
+        for name in self.class_names:
             text_results+=name+"\n"
         with open(output_path, "w") as file:
             file.write(text_results)
+    
+    def get_label_names(self):
+        self.class_names=list(self.model.names.values())
+        print(self.class_names)
+        self.colors=[]
+        for i, x in enumerate(self.class_names):
+            self.colors.append(rgb(0, len(self.class_names), i))
+
+    def get_color(self, label_name):
+        color = self.colors[self.class_names.index(label_name)]
+        return color
 
     def plot_predict(self, input_image_path, output_image_path, min_conf):
         """Save predictions to a new file showing bounding boxes
@@ -150,8 +163,7 @@ class YoloDetector():
                     text_results += f"{label} {cx/image_size} {cy/image_size} {w/image_size} {h/image_size}\n"
                     # cv format: x1y1 x2y2
                     # add rectangle for det
-                    bgr = self.__config["labels"]["colors"][self.__config["labels"]["class_names"].index(label_name)]
-                    cv2.rectangle(frame, (x1, y1), (x2, y2), bgr, 1)
+                    cv2.rectangle(frame, (x1, y1), (x2, y2), self.get_color(label_name), 1)
                     # cv2.putText(frame, label_name, (x1, y1), cv2.FONT_HERSHEY_SIMPLEX, 0.9, bgr, 2)
                     labels.add(label_name)
                 else:
@@ -160,8 +172,7 @@ class YoloDetector():
         labels.sort()
         # add class names to bottom left of image
         for i, label_name in enumerate(labels):
-            bgr = self.__config["labels"]["colors"][self.__config["labels"]["class_names"].index(label_name)]
-            cv2.putText(frame, label_name, (0, height-22*(i)-10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, bgr, 2)
+            cv2.putText(frame, label_name, (0, height-22*(i)-10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, self.get_color(label_name), 2)
         # save image
         Image.fromarray(frame).save(output_image_path)
         with open(input_image_path.replace(self.__config["spectrogram"]["format"],"txt"), "w") as file:

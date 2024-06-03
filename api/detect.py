@@ -46,7 +46,7 @@ def parse_recording(audio_path, min_conf):
     start_time=time.time()
 
     custom_print("Extracting audio...", save_path=log_path)
-    datapoint = DataPoint([],audio_path)
+    datapoint = DataPoint(audio_path)
     datapoint.extract_audio()
 
     custom_print("Splitting audio into segments...", save_path=log_path)

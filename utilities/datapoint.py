@@ -87,20 +87,13 @@ class DataPoint:
     Split time data
     """
 
-    def __init__(self,names,path):
+    def __init__(self,path):
         """Initialize the datapoint
 
         Args:
-            names (list<str>): List of strings of this class
             path (str): Path to the audio file
         """
         self.__config = ConfigManager()
-        classification = self.__config["labels"]["class_names"]
-        self.names=names
-        self.classification = [0]*len(classification) #get the classification of this data
-        for name in self.names:
-            self.classification[classification.index(name)]=1
-        self.classification=np.array(self.classification)
         self.path=path
         self.filedata=None
         self.audio=None
