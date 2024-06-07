@@ -44,7 +44,7 @@ if __name__ == "__main__":
         print(singleton.path)
         singleton.extract_audio()
         print("Splitting audio and generating SXX")
-        singleton.generate_ssxs()
+        singleton.generate_sxxs()
         print("Saving spectrograms")
         singleton.generate_spectrograms(force=force)
     end_time = time.time()

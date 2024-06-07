@@ -28,12 +28,12 @@ class Audio():
 
         if path!=None:
             # Convert the audio to the desired format
-            audio = AudioSegment.from_file(path)
-            audio = audio.set_frame_rate(self.__config["audio"]["sample_rate"])  # Set sample rate to 44100Hz
-            audio = audio.set_sample_width(self.__config["audio"]["sample_width"])  # Set to 16-bit
-            audio = audio.set_channels(self.__config["audio"]["channels"])  # Set to mono
+            self.audio = AudioSegment.from_file(path)
+            self.audio = self.audio.set_frame_rate(self.__config["audio"]["sample_rate"])  # Set sample rate to 44100Hz
+            self.audio = self.audio.set_sample_width(self.__config["audio"]["sample_width"])  # Set to 16-bit
+            self.audio = self.audio.set_channels(self.__config["audio"]["channels"])  # Set to mono
             processed_path = os.path.join(os.path.dirname(path), f'converted_{os.path.basename(path.replace(".","_"))}.wav')
-            audio.export(processed_path, format="wav")
+            self.audio.export(processed_path, format="wav")
             
             try:
                 fs, aud = wavfile.read(processed_path)
@@ -103,7 +103,6 @@ class Audio():
         """
         if not path:
             path = self.path
-        print(type(self.audio))
         if self.audio==b'':
             return
         wavefile = wave.open(path, 'wb')

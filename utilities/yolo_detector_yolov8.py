@@ -6,7 +6,7 @@ from PIL import Image
 
 from config.config_manager import ConfigManager
 from ultralytics import YOLO
-from utilities.datapoint import rgb
+from utilities.image_utils import rgb
 
 #TODO: TBD: Make yolo detector a separate service?
 

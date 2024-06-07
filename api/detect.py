@@ -2,6 +2,8 @@ import os
 import sys
 import time
 
+import numpy as np
+
 from config.config_manager import ConfigManager
 from utilities.audio import Audio
 from utilities.datapoint import DataPoint
@@ -41,27 +43,30 @@ def parse_recording(audio_path, min_conf):
     __yolo = YoloDetector()
     save_path = os.path.dirname(audio_path)
     log_path = os.path.join(save_path,"log.txt")
-    
+
     custom_print(os.path.basename(save_path), save_path=log_path)
     start_time=time.time()
 
     custom_print("Extracting audio...", save_path=log_path)
-    datapoint = DataPoint(audio_path)
+    datapoint = DataPoint(audio_path=audio_path)
     datapoint.extract_audio()
 
     custom_print("Splitting audio into segments...", save_path=log_path)
-    audio_splits = datapoint.get_audio_splits()
+    list_audio_bytes = datapoint.get_audio_splits()
     sxx_splits = []
-    for i, audio in enumerate(audio_splits):
-        custom_print(f"Generating SXX {i+1}/{len(audio_splits)}", save_path=log_path)
-        sxx = datapoint.generate_ssx(audio)
+    for i, audio_bytes in enumerate(list_audio_bytes):
+        custom_print(f"Generating SXX {i+1}/{len(list_audio_bytes)}", save_path=log_path)
+        audio_array=np.frombuffer(audio_bytes, dtype=np.int16)
+        sxx = datapoint.generate_sxx(audio_array)
         sxx_splits.append(sxx)
 
-    for i, spectro in enumerate(sxx_splits):
+    for i, sxx in enumerate(sxx_splits):
         custom_print(f"Generating spectrogram {i+1}/{len(sxx_splits)}", save_path=log_path)
-        datapoint.generate_spectrogram(spectro, os.path.join(save_path,f"spectro_{i}"))
-    for i, audio in enumerate(audio_splits):
-        custom_print(f"Saving audio {i+1}/{len(audio_splits)}", save_path=log_path)
+        image_save_path=os.path.join(save_path,f'spectro_{i}.{__config["spectrogram"]["format"]}')
+        datapoint.generate_spectrogram(sxx, save_path=image_save_path, image_gain=100)
+
+    for i, audio in enumerate(list_audio_bytes):
+        custom_print(f"Saving audio {i+1}/{len(list_audio_bytes)}", save_path=log_path)
         a = Audio(audio=audio)
         a.save(os.path.join(save_path,f"audio_{i}.wav"))
 
@@ -71,7 +76,7 @@ def parse_recording(audio_path, min_conf):
         __yolo.plot_predict(os.path.join(save_path,file),
                             os.path.join(save_path,file).replace("spectro", "predicted"),
                             min_conf)
-        custom_print(f"Saving detected images... {i+1}/{len(audio_splits)}", save_path=log_path)
+        custom_print(f"Saving detected images... {i+1}/{len(list_audio_bytes)}", save_path=log_path)
     __yolo.save_labels(os.path.join(save_path, "classes.txt"))
     __export_data(save_path)
 

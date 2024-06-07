@@ -8,7 +8,7 @@ from flask import Blueprint, request
 
 from config.config_manager import ConfigManager
 from utilities.audio import Audio
-from utilities.datapoint import spectro_gen
+from utilities.datapoint import DataPoint
 from utilities.file_utils import get_chunk_id
 from utilities.media_id_translator import media_id_translator
 from utilities.spectrogram import spectrogram
@@ -88,10 +88,22 @@ class LiveYoloRunner():
             if(self.alive==False and len(need_processing)==0):
                 return #now we are done processing and no more recordings, so stop.
             time.sleep(0.5)
-    def update_params(self,detection, gain, min_conf):
+    def update_params(self, detection, gain, min_conf):
         self.detection=detection
         self.gain=gain
         self.min_conf=min_conf
+    def validate_params(self):
+        # precheck audio gain
+        failed = False
+        try:
+            self.gain = float(self.gain)
+            if(self.gain<0):
+                failed=True
+        except:
+            failed=True
+        if failed:
+            self.gain=__config["spectrogram"]["default_image_gain"]
+
     def status(self):
         return self.alive
     def stop(self):
@@ -319,34 +331,24 @@ def parse_local_recording(dataset_id):
 
 def processFrames(dataset_dir, path_audio_blob, detection, gain, chunk_id, min_conf):
 
+    #preprocessing
     if not os.path.exists(path_audio_blob):
         return
     audio = Audio(path=path_audio_blob)
     if not os.path.exists(os.path.join(dataset_dir, 'start_time.txt')):
         open(os.path.join(dataset_dir, 'start_time.txt'),"w").write(str(time.time()))
 
-    ################## perform spectrogram operations
-    audio_bytes = np.frombuffer(audio.audio, dtype=np.int16)
-    s = spectrogram(audio_bytes, audio.fs)
-    f, Sxx=s.limit_frequencies(fmin, fmax)
+    audio_bytes_array = np.frombuffer(audio.audio, dtype=np.int16)
 
-    # precheck audio gain
-    failed = False
-    try:
-        res = float(gain)
-        if(res<0):
-            failed=True
-    except:
-        failed=True
-    if failed:
-        return -1
+    # Create a datapoint to store the spectrograms
+    datapoint=DataPoint()
+    datapoint.extract_audio(audio_bytes=audio_bytes_array)
+    Sxx=datapoint.generate_sxx(audio_bytes_array)
 
-    # if path_audio_blob!=os.path.join(dataset_dir,f"audio_{chunk_id}.wav"):
-        # audio.save(os.path.join(dataset_dir,f"audio_{chunk_id}.wav"))
     path_spectro_image = os.path.join(dataset_dir,f'spectro_{chunk_id}.{__config["spectrogram"]["format"]}')
-    path_predicted_image = os.path.join(dataset_dir,f'predicted_{chunk_id}.{__config["spectrogram"]["format"]}')
-    spectro_gen(path_spectro_image, Sxx, __config["yolo"]["size"], float(gain))
+    datapoint.generate_spectrogram(Sxx, path_spectro_image, float(gain))
 
+    path_predicted_image = os.path.join(dataset_dir,f'predicted_{chunk_id}.{__config["spectrogram"]["format"]}')
     image_id = None
     if(detection):
         print("------------ starting prediction")
