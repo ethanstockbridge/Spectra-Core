@@ -1,27 +1,36 @@
 # Introduction
-Spectra is an artificial intelligence software that can identify the sound of multiple different classes, all at once! Spectra identifies classes, generates sensor data graphs, and more!
-Spectra supports environment sensors such as temperature, humidity, light sensors, pretty much anything that is quantifiable!  
-Running on a cutting edge, yolo-based backend, this software is quick and efficient.  
-Please note that this repository is coded in my free time with no funding, and thus may contain bugs.  
-The associated repositories [Core](https://github.com/ethanstockbridge/Spectra-Core) and [UI](https://github.com/ethanstockbridge/Spectra-UI) framework work together, which allows users to easily access the user interface on any browser.
+Spectra is a data analytics software that leverages the usage of artificial intelligence to identify the sound of multiple different classes, all at once. Spectra manages the recording of audio and sensor data, detects multiple classes, generates data graphs, and more!  
+Spectra supports remote environmental sensors such as: temperature, humidity, wind speed, light sensors and pretty much anything else that is quantifiable.  
+Running on a cutting edge, [yolov8](https://github.com/ultralytics/ultralytics) based backend, this software can perform analysis quickly and efficiently.  
+The associated repositories [Spectra-Core](https://github.com/ethanstockbridge/Spectra-Core) and [Spectra-UI](https://github.com/ethanstockbridge/Spectra-UI) framework work together, which allows users to easily access the user interface on any modern browser.
 
-# Requirements:  
+# Dataflow
+
+The inputs are collected by using the [Spectra-UI](https://github.com/ethanstockbridge/Spectra-UI) webapp, which consists of a configurable length audio buffer. Additionally, remote sensor stations can be set up for the server to collect data such as temperature and humidity.  
+From there, the core app processes the incoming data, converts it to a spectrogram and runs image detection on it. In parallel, sensor data is collected and stored for the run.  
+After processing, the core app stores the detections to disc, in image form and text form, for easy postprocessing purposes. Sensor data is transformed into easy-to-read graphs that can show trends of detections, and sensor visualization.
+
+<img src="./res/dataflow.png"/>  
+
+# Software Requirements:  
 * Python 3.7.9: tested & working. (Other versions ***may*** also work, but no guarantee)
 * Modules: opencv, numpy, yolo, etc, install with `pip install -r requirements.txt`
 
 # Hardware requirements
 
 - Please note that there are certain hardware requirements that are needed to run the artificial intelligence, such as nvidia cuda. This mostly pertains to yolo and the underlying modules that it uses, so please check out their website for more information  
-    - Tested and working on NVIDIA GeForce GTX 1050ti
+    - Tested and working on NVIDIA GeForce GTX 1050ti (with cuda v11.7)
 
 # Quickstart
 
 ## Installation
 
-1) install python 3.7.9 (recommended)
-2) pip install -r requirements.txt
-3) Edit the variables.py to update the paths of your project
-4) py start_server.py
+1) Install [python 3.7.9](https://www.python.org/downloads/release/python-379/) (recommended version)
+2) `pip install -r requirements.txt`
+3) Edit the file variables.py and ./Config/default.toml to update the paths and configuration of your project
+4) Start with `py start_server.py`
+
+# Training:  
 
 ## File & yolo configuration
 
@@ -39,8 +48,8 @@ Begin by cloning this project and creating some of the (missing) following folde
             - ...
         - ...
         -mixed/random (optional)
-    - audio (generated, same layout as recorded)
-    - images (generated, same layout as recorded)
+    - audio (generated for training, same layout as recorded)
+    - images (generated for training, same layout as recorded)
     - labeled (same layout as recorded)
     - unlabeled (same layout as recorded)
     - yolo
@@ -57,7 +66,6 @@ Begin by cloning this project and creating some of the (missing) following folde
         - yolov8<x>.pt
 ```
 
-# Training:  
 **Step 1:**  
 Gather data in the form of audio files. These can be pre-recorded from a phone, tablet, or PC.  
 After your files are ready, arrange the files appropriately as shown above (refer to 'recorded').  
@@ -80,11 +88,6 @@ Once downloaded the initial yolo model, you can train offline using this:
 `yolo train model=yolov8n.pt data=config.yaml`  
 Additional typical yolo arguments can be added such as `epochs=500`, `lr0=0.001`, etc.
 
-# User interface
-This is a work in progress, but I have made a user interface using React that allows real-time identification of calls. Note that you must first complete a training to use the UI (otherwise it's kind of pointless trying to identify without using a model) 
-After completion of training, follow the instructions to fetch and install the UI repository:
-[Spectra-UI](https://github.com/ethanstockbridge/Spectra-UI)
-
 # License  
-This project is licensed under the GNU AFFERO GENERAL PUBLIC LICENSE.
+This project is licensed under the **GNU AFFERO GENERAL PUBLIC LICENSE**.
 Please see the LICENSE file for more information  
